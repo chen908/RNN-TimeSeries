@@ -1,3 +1,2 @@
-# rnn
-RNN to predict sin.
+# RNN
 Using RNN to predict sin.
