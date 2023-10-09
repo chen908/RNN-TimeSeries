@@ -45,19 +45,10 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 # train
 x = []
-# for i in range(input_size):
-#     x.append(math.sin((0 + i) * 0.01))
 for epoch in range(2000):
-    # for step in range(step_num):
-    x = [[math.sin((epoch + i) * step_size)] for i in range(num_time_steps)]
-    # input_size = 4, 前4个epoch中，没有的位置用0填充
-    # create a list of 4 zeros
-
-    # for i in range(input_size):
-    #     if epoch - i >= 0:
-    #         x[input_size - 1 - i] = math.sin((epoch - i) * 0.01)
+    x = [[math.sin(i * step_size)] for i in range(num_time_steps)]
     x = torch.Tensor([x]).to(device=device)
-    y = [[math.sin((epoch + i + 1) * step_size)] for i in range(num_time_steps)]
+    y = [[math.sin((i + 1) * step_size)] for i in range(num_time_steps)]
     y = torch.Tensor([y]).to(device=device)
     output, hidden_prev = model(x, hidden_prev)
     hidden_prev = hidden_prev.detach()
@@ -65,27 +56,19 @@ for epoch in range(2000):
     model.zero_grad()
     loss.backward()
     optimizer.step()
-
-    optimizer.zero_grad()
-
-    # x.pop(0)
-    # x.append(math.sin((epoch + input_size) * 0.01))
     print("Epoch: {}, loss: {}".format(epoch, loss.item()))
 
 # test
 model.eval()
-
-x = [[math.sin((i) * step_size+1)] for i in range(100)]
+x = [[math.sin((i) * step_size + 1)] for i in range(100)]
 out = x.copy()
 hidden_prev = torch.zeros(num_layers, batch_size, hidden_size, device=device)
 for epoch in range(num_time_steps):
-    # input_size = 4, 前4个epoch中，没有的位置用0填充
-    # create a list of 4 zeros
-    # output = math.sin(0.01)
     output, hidden_prev = model(torch.Tensor([x]).to(device=device), hidden_prev)
     x.pop(0)
     x.append([output.detach()[0][-1][0]])
     out.append([output.detach().to(device='cpu')[0][-1][0]])
+
 # plot the result, the blue line is the prediction, the red line is the real sin value
 plt.figure()
 plt.plot(np.arange(0, 100, step_size), np.sin(np.arange(0, 100, step_size)), color='r')
